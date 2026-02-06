@@ -1,3 +1,5 @@
+import json
+
 catatan = []
 mapel_favorit = []
 target_harian = 0
@@ -232,6 +234,61 @@ def cek_progress_harian():
     else:
         print("\n🚀 Mari mulai belajar!")
 
+def simpan_ke_file():
+    print("\n--- Simpan Data ke File ---")
+    
+    try:
+        # Buat dictionary dengan semua data
+        data = {
+            "catatan": catatan,
+            "mapel_favorit": mapel_favorit,
+            "target_harian": target_harian
+        }
+        
+        # Simpan ke file JSON
+        with open("study_log_data.json", "w") as file:
+            json.dump(data, file, indent=4)
+        
+        print(f"✓ Data berhasil disimpan ke file 'study_log_data.json'")
+    except Exception as e:
+        print(f"✗ Terjadi kesalahan saat menyimpan: {e}")
+
+def load_dari_file():
+    global catatan, mapel_favorit, target_harian
+    print("\n--- Load Data dari File ---")
+    
+    try:
+        # Baca file JSON
+        with open("study_log_data.json", "r") as file:
+            data = json.load(file)
+        
+        # Restore data ke dalam variabel global
+        catatan = data.get("catatan", [])
+        mapel_favorit = data.get("mapel_favorit", [])
+        target_harian = data.get("target_harian", 0)
+        
+        print(f"✓ Data berhasil dimuat dari file")
+        print(f"  - {len(catatan)} catatan belajar")
+        print(f"  - {len(mapel_favorit)} mapel favorit")
+        print(f"  - Target harian: {target_harian} menit")
+    except FileNotFoundError:
+        print("✗ File 'study_log_data.json' tidak ditemukan")
+    except Exception as e:
+        print(f"✗ Terjadi kesalahan saat membaca: {e}")
+
+def hapus_file_data():
+    print("\n--- Hapus File Data ---")
+    
+    try:
+        import os
+        if os.path.exists("study_log_data.json"):
+            os.remove("study_log_data.json")
+            print("✓ File 'study_log_data.json' berhasil dihapus")
+        else:
+            print("✗ File 'study_log_data.json' tidak ditemukan")
+    except Exception as e:
+        print(f"✗ Terjadi kesalahan saat menghapus: {e}")
+
 def menu():
     print("\n=== Study Log App ===")
     print("1. Tambah catatan belajar")
@@ -240,7 +297,8 @@ def menu():
     print("4. Mapel Favorit")
     print("5. Filter per mapel")
     print("6. Target Harian")
-    print("7. Keluar")
+    print("7. Simpan/Load Data")
+    print("8. Keluar")
 
 while True:
     menu()
@@ -285,6 +343,21 @@ while True:
         else:
             print("Pilihan tidak valid")
     elif pilihan == "7":
+        print("\n--- Menu Simpan/Load Data ---")
+        print("a. Simpan data ke file")
+        print("b. Load data dari file")
+        print("c. Hapus file data")
+        sub_pilihan = input("Pilih opsi: ")
+        
+        if sub_pilihan == "a":
+            simpan_ke_file()
+        elif sub_pilihan == "b":
+            load_dari_file()
+        elif sub_pilihan == "c":
+            hapus_file_data()
+        else:
+            print("Pilihan tidak valid")
+    elif pilihan == "8":
         print("Terima kasih, terus semangat belajar!")
         break
     else:
