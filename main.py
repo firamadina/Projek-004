@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 catatan = []
 mapel_favorit = []
@@ -12,11 +13,12 @@ def tambah_catatan():
     topik = input("Masukkan topik: ")
     durasi = int(input("Masukkan durasi belajar (menit): "))
     
-    # Membuat dictionary untuk satu catatan
+    # Membuat dictionary untuk satu catatan (dengan tanggal otomatis)
     data_catatan = {
         "mapel": mapel,
         "topik": topik,
-        "durasi": durasi
+        "durasi": durasi,
+        "tanggal": datetime.now().strftime("%Y-%m-%d")
     }
     
     # Menyimpan data ke dalam list catatan
@@ -38,6 +40,8 @@ def lihat_catatan():
         print(f"  Mapel  : {data['mapel']}")
         print(f"  Topik  : {data['topik']}")
         print(f"  Durasi : {data['durasi']} menit")
+        if 'tanggal' in data:
+            print(f"  Tanggal: {data['tanggal']}")
     print("\n" + "="*60)
 
 def total_waktu():
@@ -289,6 +293,118 @@ def hapus_file_data():
     except Exception as e:
         print(f"✗ Terjadi kesalahan saat menghapus: {e}")
 
+def ringkasan_mingguan():
+    print("\n--- Ringkasan Mingguan ---")
+    
+    # Cek apakah data kosong
+    if len(catatan) == 0:
+        print("Belum ada catatan belajar. Mulai tambahkan catatan Anda!")
+        return
+    
+    # Hitung 7 hari terakhir
+    hari_ini = datetime.now().date()
+    
+    # Dictionary untuk menyimpan total per hari
+    total_per_hari = {}
+    for i in range(7):
+        tanggal = hari_ini - timedelta(days=i)
+        total_per_hari[tanggal] = 0
+    
+    # Hitung total durasi per hari
+    for data in catatan:
+        if 'tanggal' in data:
+            try:
+                tanggal = datetime.strptime(data['tanggal'], "%Y-%m-%d").date()
+                if tanggal in total_per_hari:
+                    total_per_hari[tanggal] += data['durasi']
+            except:
+                pass
+    
+    # Tampilkan ringkasan mingguan
+    print("\n" + "="*60)
+    print("Ringkasan Belajar 7 Hari Terakhir")
+    print("="*60)
+    
+    total_minggu = 0
+    hari_nama = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+    
+    # Urutkan dari 7 hari lalu ke hari ini
+    tanggal_sorted = sorted(total_per_hari.keys())
+    
+    for idx, tanggal in enumerate(tanggal_sorted):
+        durasi = total_per_hari[tanggal]
+        total_minggu += durasi
+        hari_index = tanggal.weekday()
+        hari_text = hari_nama[hari_index]
+        
+        # Format tanggal
+        tanggal_str = tanggal.strftime("%d/%m/%Y")
+        
+        # Buat bar visual
+        panjang_bar = int(durasi / 10) if durasi > 0 else 0
+        bar = "█" * panjang_bar
+        
+        print(f"\n{hari_text:8} ({tanggal_str}): {durasi:3} menit {bar}")
+    
+    # Total mingguan
+    jam_total = total_minggu // 60
+    menit_total = total_minggu % 60
+    rata_rata = total_minggu // 7
+    
+    print("\n" + "="*60)
+    print(f"Total mingguan   : {total_minggu} menit ({jam_total} jam {menit_total} menit)")
+    print(f"Rata-rata sehari : {rata_rata} menit")
+    print("="*60)
+
+def ringkasan_per_mapel_minggu():
+    print("\n--- Ringkasan Mingguan per Mapel ---")
+    
+    # Cek apakah data kosong
+    if len(catatan) == 0:
+        print("Belum ada catatan belajar. Mulai tambahkan catatan Anda!")
+        return
+    
+    # Ambil daftar mapel unik
+    daftar_mapel = []
+    for data in catatan:
+        if data['mapel'] not in daftar_mapel:
+            daftar_mapel.append(data['mapel'])
+    
+    # Hitung total per mapel untuk 7 hari terakhir
+    hari_ini = datetime.now().date()
+    total_mapel = {}
+    
+    for mapel in daftar_mapel:
+        total_mapel[mapel] = 0
+    
+    for data in catatan:
+        if 'tanggal' in data:
+            try:
+                tanggal = datetime.strptime(data['tanggal'], "%Y-%m-%d").date()
+                # Hanya hitung 7 hari terakhir
+                if (hari_ini - tanggal).days < 7:
+                    total_mapel[data['mapel']] += data['durasi']
+            except:
+                pass
+    
+    # Tampilkan ringkasan
+    print("\n" + "="*60)
+    print("Statistik Belajar per Mapel (7 Hari Terakhir)")
+    print("="*60)
+    
+    # Urutkan berdasarkan total durasi (descending)
+    sorted_mapel = sorted(total_mapel.items(), key=lambda x: x[1], reverse=True)
+    
+    for i, (mapel, durasi) in enumerate(sorted_mapel, 1):
+        jam = durasi // 60
+        menit = durasi % 60
+        panjang_bar = int(durasi / 15)
+        bar = "█" * panjang_bar
+        
+        print(f"\n{i}. {mapel:15} : {durasi:3} menit ({jam}j {menit}m) {bar}")
+    
+    print("\n" + "="*60)
+
 def menu():
     print("\n=== Study Log App ===")
     print("1. Tambah catatan belajar")
@@ -297,8 +413,9 @@ def menu():
     print("4. Mapel Favorit")
     print("5. Filter per mapel")
     print("6. Target Harian")
-    print("7. Simpan/Load Data")
-    print("8. Keluar")
+    print("7. Ringkasan Mingguan")
+    print("8. Simpan/Load Data")
+    print("9. Keluar")
 
 while True:
     menu()
@@ -343,6 +460,18 @@ while True:
         else:
             print("Pilihan tidak valid")
     elif pilihan == "7":
+        print("\n--- Menu Ringkasan Mingguan ---")
+        print("a. Ringkasan waktu mingguan")
+        print("b. Ringkasan per mapel mingguan")
+        sub_pilihan = input("Pilih opsi: ")
+        
+        if sub_pilihan == "a":
+            ringkasan_mingguan()
+        elif sub_pilihan == "b":
+            ringkasan_per_mapel_minggu()
+        else:
+            print("Pilihan tidak valid")
+    elif pilihan == "8":
         print("\n--- Menu Simpan/Load Data ---")
         print("a. Simpan data ke file")
         print("b. Load data dari file")
@@ -357,7 +486,7 @@ while True:
             hapus_file_data()
         else:
             print("Pilihan tidak valid")
-    elif pilihan == "8":
+    elif pilihan == "9":
         print("Terima kasih, terus semangat belajar!")
         break
     else:
