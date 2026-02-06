@@ -20,7 +20,21 @@ def tambah_catatan():
     print("✓ Catatan berhasil ditambahkan!")
 
 def lihat_catatan():
-    pass
+    print("\n--- Lihat Catatan Belajar ---")
+    
+    # Cek apakah data kosong
+    if len(catatan) == 0:
+        print("Belum ada catatan belajar. Mulai tambahkan catatan Anda!")
+        return
+    
+    # Tampilkan semua catatan dengan format rapi
+    print("\n" + "="*60)
+    for i, data in enumerate(catatan, 1):
+        print(f"\nCatatan No. {i}")
+        print(f"  Mapel  : {data['mapel']}")
+        print(f"  Topik  : {data['topik']}")
+        print(f"  Durasi : {data['durasi']} menit")
+    print("\n" + "="*60)
 
 def total_waktu():
     pass
