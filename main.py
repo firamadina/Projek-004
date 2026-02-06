@@ -110,13 +110,67 @@ def hapus_mapel_favorit():
     except ValueError:
         print("✗ Masukkan angka yang valid!")
 
+def filter_per_mapel():
+    print("\n--- Filter Catatan per Mapel ---")
+    
+    # Cek apakah data kosong
+    if len(catatan) == 0:
+        print("Belum ada catatan belajar. Mulai tambahkan catatan Anda!")
+        return
+    
+    # Ambil daftar mapel unik dari catatan
+    daftar_mapel = []
+    for data in catatan:
+        if data['mapel'] not in daftar_mapel:
+            daftar_mapel.append(data['mapel'])
+    
+    # Tampilkan pilihan mapel
+    print("\nMapel yang tersedia:")
+    for i, mapel in enumerate(daftar_mapel, 1):
+        print(f"  {i}. {mapel}")
+    
+    # Minta user memilih mapel
+    try:
+        pilihan = int(input("\nPilih nomor mapel: "))
+        
+        if 1 <= pilihan <= len(daftar_mapel):
+            mapel_pilihan = daftar_mapel[pilihan - 1]
+            
+            # Filter catatan berdasarkan mapel pilihan
+            catatan_filter = [data for data in catatan if data['mapel'] == mapel_pilihan]
+            
+            # Tampilkan catatan per mapel
+            print("\n" + "="*60)
+            print(f"Catatan untuk mapel: {mapel_pilihan}")
+            print("="*60)
+            
+            for i, data in enumerate(catatan_filter, 1):
+                print(f"\nCatatan No. {i}")
+                print(f"  Topik  : {data['topik']}")
+                print(f"  Durasi : {data['durasi']} menit")
+            
+            # Hitung total waktu untuk mapel pilihan
+            total_mapel = sum(data['durasi'] for data in catatan_filter)
+            jam = total_mapel // 60
+            menit = total_mapel % 60
+            
+            print("\n" + "="*60)
+            print(f"Total waktu belajar {mapel_pilihan}: {total_mapel} menit")
+            print(f"Setara dengan: {jam} jam {menit} menit")
+            print("="*60)
+        else:
+            print("✗ Nomor tidak valid!")
+    except ValueError:
+        print("✗ Masukkan angka yang valid!")
+
 def menu():
     print("\n=== Study Log App ===")
     print("1. Tambah catatan belajar")
     print("2. Lihat catatan belajar")
     print("3. Total waktu belajar")
     print("4. Mapel Favorit")
-    print("5. Keluar")
+    print("5. Filter per mapel")
+    print("6. Keluar")
 
 while True:
     menu()
@@ -144,6 +198,8 @@ while True:
         else:
             print("Pilihan tidak valid")
     elif pilihan == "5":
+        filter_per_mapel()
+    elif pilihan == "6":
         print("Terima kasih, terus semangat belajar!")
         break
     else:
