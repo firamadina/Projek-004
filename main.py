@@ -1,5 +1,6 @@
 catatan = []
 mapel_favorit = []
+target_harian = 0
 
 def tambah_catatan():
     print("\n--- Tambah Catatan Belajar ---")
@@ -163,6 +164,74 @@ def filter_per_mapel():
     except ValueError:
         print("✗ Masukkan angka yang valid!")
 
+def set_target_harian():
+    global target_harian
+    print("\n--- Set Target Harian ---")
+    
+    try:
+        # Meminta input target harian
+        target = int(input("Masukkan target waktu belajar harian (menit): "))
+        
+        if target <= 0:
+            print("✗ Target harus lebih dari 0 menit!")
+            return
+        
+        # Simpan target harian
+        target_harian = target
+        jam = target // 60
+        menit = target % 60
+        
+        print(f"✓ Target harian berhasil diset: {target} menit ({jam} jam {menit} menit)")
+    except ValueError:
+        print("✗ Masukkan angka yang valid!")
+
+def lihat_target_harian():
+    print("\n--- Target Harian ---")
+    
+    if target_harian == 0:
+        print("Belum ada target harian. Silakan set target harian Anda!")
+        return
+    
+    jam = target_harian // 60
+    menit = target_harian % 60
+    print(f"Target waktu belajar harian Anda: {target_harian} menit")
+    print(f"Setara dengan: {jam} jam {menit} menit")
+
+def cek_progress_harian():
+    print("\n--- Progres Target Harian ---")
+    
+    if target_harian == 0:
+        print("Belum ada target harian. Silakan set target harian Anda!")
+        return
+    
+    # Hitung total waktu belajar hari ini
+    total_hari_ini = sum(data['durasi'] for data in catatan)
+    
+    # Hitung persentase progress
+    persentase = (total_hari_ini / target_harian) * 100
+    
+    # Tampilkan progress
+    print(f"\nTarget harian    : {target_harian} menit")
+    print(f"Waktu belajar    : {total_hari_ini} menit")
+    print(f"Sisa target      : {max(0, target_harian - total_hari_ini)} menit")
+    print(f"Progress         : {persentase:.1f}%")
+    
+    # Progress bar visual
+    panjang_bar = 30
+    filled = int((persentase / 100) * panjang_bar)
+    bar = "█" * filled + "░" * (panjang_bar - filled)
+    print(f"[{bar}]")
+    
+    # Pesan motivasi
+    if persentase >= 100:
+        print("\n🎉 Selamat! Anda sudah mencapai target harian!")
+    elif persentase >= 75:
+        print("\n💪 Tinggal sedikit lagi! Semangat!")
+    elif persentase >= 50:
+        print("\n📚 Sudah setengah jalan, lanjutkan!")
+    else:
+        print("\n🚀 Mari mulai belajar!")
+
 def menu():
     print("\n=== Study Log App ===")
     print("1. Tambah catatan belajar")
@@ -170,7 +239,8 @@ def menu():
     print("3. Total waktu belajar")
     print("4. Mapel Favorit")
     print("5. Filter per mapel")
-    print("6. Keluar")
+    print("6. Target Harian")
+    print("7. Keluar")
 
 while True:
     menu()
@@ -200,6 +270,21 @@ while True:
     elif pilihan == "5":
         filter_per_mapel()
     elif pilihan == "6":
+        print("\n--- Menu Target Harian ---")
+        print("a. Set target harian")
+        print("b. Lihat target harian")
+        print("c. Cek progress harian")
+        sub_pilihan = input("Pilih opsi: ")
+        
+        if sub_pilihan == "a":
+            set_target_harian()
+        elif sub_pilihan == "b":
+            lihat_target_harian()
+        elif sub_pilihan == "c":
+            cek_progress_harian()
+        else:
+            print("Pilihan tidak valid")
+    elif pilihan == "7":
         print("Terima kasih, terus semangat belajar!")
         break
     else:
